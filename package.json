@@ -1,0 +1,34 @@
+{
+	"name": "rn-zendesk",
+	"version": "0.0.1",
+	"description": "React Native Wrapper around Zendesk Chat",
+	"main": "index.js",
+	"types": "RNZendesk.d.ts",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/idopterlabs/rn-zendesk"
+	},
+	"scripts": {
+		"prettier": "prettier",
+		"prettier:all": "prettier --write '**/*.json' '**/*.js' '**/*.ts' ",
+		"lint": "eslint"
+	},
+	"keywords": [
+		"zendesk",
+		"chat",
+		"react-native",
+		"react",
+		"ios",
+		"android",
+		"react-component"
+	],
+	"homepage": "https://github.com/idopterlabs/rn-zendesk.git",
+	"bugs": "https://github.com/idopterlabs/rn-zendesk/issues",
+	"author": "idopterlabs",
+	"license": "MIT",
+	"devDependencies": { "prettier": "2.0.x", "eslint": "7.3.x" },
+	"peerDependencies": {
+		"react": "^16.11.0",
+		"react-native": "0.60.x | 0.61.x | 0.62.x | 0.63.x"
+	}
+}
