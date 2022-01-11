@@ -3,7 +3,7 @@
 	"version": "0.0.1",
 	"description": "React Native Wrapper around Zendesk Chat",
 	"main": "index.js",
-	"types": "RNZendesk.d.ts",
+	"types": "index.d.ts",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/idopterlabs/rn-zendesk"

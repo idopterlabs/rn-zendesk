@@ -1,4 +1,4 @@
-declare module 'rn-zendesk' {
+declare module 'react-native-zendesk-v2' {
 
   // function to display chat box
   export function startChat(chatOptions: ChatOptions): void;
@@ -8,6 +8,9 @@ declare module 'rn-zendesk' {
 
   // init function when you just want to use chat sdk
   export function initChat(accountKey: string): void;
+
+  // set jwt token for authentication when you want to use chat sdk
+  export function setUserIdentity(accountKey: JWT): void;
 
   // function to set primary color code for the chat theme, pass hex code of the color here
   export function setPrimaryColor(color: string): void;
@@ -44,6 +47,13 @@ declare module 'rn-zendesk' {
     clientId: string,
     // support url of zendesk account
     url: string,
+  }
+
+  interface JWT {
+    // jwt token
+    token?: string,
+    name?: string,
+    email?: string,
   }
 
   interface UserInfo {
