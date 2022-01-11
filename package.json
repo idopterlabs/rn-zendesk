@@ -1,5 +1,5 @@
 {
-	"name": "rn-zendesk",
+	"name": "@idopterlabs/rn-zendesk",
 	"version": "0.0.1",
 	"description": "React Native Wrapper around Zendesk Chat",
 	"main": "index.js",
