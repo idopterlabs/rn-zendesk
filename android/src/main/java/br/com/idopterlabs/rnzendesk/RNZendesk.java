@@ -3,99 +3,102 @@ package br.com.idopterlabs.rnzendesk;
 
 import android.app.Activity;
 import android.content.Context;
-
-import android.graphics.Color;
-import android.os.Build;
-import androidx.core.content.ContextCompat;
 import android.util.Log;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.FrameLayout;
 
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
+import com.zendesk.logger.Logger;
 
-import java.lang.String;
-
-import javax.annotation.Nullable;
+import zendesk.answerbot.AnswerBot;
+import zendesk.answerbot.AnswerBotEngine;
 import zendesk.chat.Chat;
 import zendesk.chat.ChatConfiguration;
 import zendesk.chat.ChatEngine;
 import zendesk.chat.ChatProvider;
-import zendesk.chat.ChatSessionStatus;
-import zendesk.chat.ChatState;
-import zendesk.chat.ObservationScope;
-import zendesk.chat.Observer;
-import zendesk.chat.PreChatFormFieldStatus;
+import zendesk.chat.ChatProvidersConfiguration;
 import zendesk.chat.ProfileProvider;
-import zendesk.chat.PushNotificationsProvider;
 import zendesk.chat.Providers;
+import zendesk.chat.PushNotificationsProvider;
 import zendesk.chat.VisitorInfo;
-import zendesk.core.JwtIdentity;
 import zendesk.core.AnonymousIdentity;
 import zendesk.core.Identity;
-import zendesk.messaging.MessagingActivity;
+import zendesk.core.JwtIdentity;
 import zendesk.core.Zendesk;
+import zendesk.messaging.MessagingActivity;
+import zendesk.messaging.MessagingConfiguration;
 import zendesk.support.Support;
-import zendesk.support.guide.HelpCenterActivity;
-import zendesk.support.guide.ViewArticleActivity;
-import zendesk.support.requestlist.RequestListActivity;
-import zendesk.answerbot.AnswerBot;
-import zendesk.answerbot.AnswerBotEngine;
 import zendesk.support.SupportEngine;
+import zendesk.support.guide.HelpCenterActivity;
+import zendesk.support.guide.HelpCenterConfiguration;
+import zendesk.support.guide.ViewArticleActivity;
+import zendesk.support.request.RequestActivity;
+import zendesk.support.requestlist.RequestListActivity;
 
 public class RNZendesk extends ReactContextBaseJavaModule {
 
-  private ReactContext appContext;
-  private static final String TAG = "ZendeskChat";
+    private ReactContext appContext;
+    private static final String TAG = "ZendeskChat";
 
-  public RNZendesk(ReactApplicationContext reactContext) {
+    public RNZendesk(ReactApplicationContext reactContext) {
         super(reactContext);
         appContext = reactContext;
-  }
+    }
 
-  @Override
-  public String getName() {
-    return "RNZendesk";
-  }
+    @Override
+    public String getName() {
+        return "RNZendesk";
+    }
 
-  @ReactMethod
+    @ReactMethod
     public void setVisitorInfo(ReadableMap options) {
-
         Providers providers = Chat.INSTANCE.providers();
         if (providers == null) {
             Log.d(TAG, "Can't set visitor info, provider is null");
             return;
         }
+
         ProfileProvider profileProvider = providers.profileProvider();
         if (profileProvider == null) {
             Log.d(TAG, "Profile provider is null");
             return;
         }
+
         ChatProvider chatProvider = providers.chatProvider();
         if (chatProvider == null) {
             Log.d(TAG, "Chat provider is null");
             return;
         }
+
         VisitorInfo.Builder builder = VisitorInfo.builder();
         if (options.hasKey("name")) {
             builder = builder.withName(options.getString("name"));
         }
+
         if (options.hasKey("email")) {
             builder = builder.withEmail(options.getString("email"));
         }
+
         if (options.hasKey("phone")) {
             builder = builder.withPhoneNumber(options.getString("phone"));
         }
+
         VisitorInfo visitorInfo = builder.build();
         profileProvider.setVisitorInfo(visitorInfo, null);
-        if (options.hasKey("department"))
-            chatProvider.setDepartment(options.getString("department"), null);
 
+        ChatProvidersConfiguration.Builder chatProvidersBuilder = ChatProvidersConfiguration.builder();
+        chatProvidersBuilder.withVisitorInfo(visitorInfo);
+
+        if (options.hasKey("department")) {
+            String departmentName = options.getString("department");
+            chatProvider.setDepartment(departmentName, null);
+            chatProvidersBuilder.withDepartment(departmentName);
+        }
+
+        ChatProvidersConfiguration chatProvidersConfiguration = chatProvidersBuilder.build();
+        Chat.INSTANCE.setChatProvidersConfiguration(chatProvidersConfiguration);
     }
 
     @ReactMethod
