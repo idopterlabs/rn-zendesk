@@ -82,6 +82,11 @@ RCT_EXPORT_METHOD(init:(NSDictionary *)options) {
   [ZDKSupport initializeWithZendesk: [ZDKZendesk instance]];
   [ZDKAnswerBot initializeWithZendesk:[ZDKZendesk instance] support:[ZDKSupport instance]];
   [ZDKChat initializeWithAccountKey:options[@"key"] queue:dispatch_get_main_queue()];
+    
+    if (options[@"isEnabledLoggable"]) {
+        [ZDKCoreLogger setEnabled:YES];
+        [ZDKCoreLogger setLogLevel:ZDKLogLevelDebug];
+    }
 }
 
 RCT_EXPORT_METHOD(initChat:(NSString *)key) {

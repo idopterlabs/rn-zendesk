@@ -112,6 +112,10 @@ public class RNZendesk extends ReactContextBaseJavaModule {
         Support.INSTANCE.init(Zendesk.INSTANCE);
         AnswerBot.INSTANCE.init(Zendesk.INSTANCE, Support.INSTANCE);
         Chat.INSTANCE.init(context, key);
+
+        if (options.hasKey("isEnabledLoggable") && options.getBoolean("isEnabledLoggable")) {
+            Logger.setLoggable(true);
+        }
     }
 
     @ReactMethod

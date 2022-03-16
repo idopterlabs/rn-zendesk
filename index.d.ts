@@ -47,6 +47,8 @@ declare module 'react-native-zendesk-v2' {
     clientId: string,
     // support url of zendesk account
     url: string,
+    // enable debug mode of zendesk sdk
+    isEnabledLoggable?: boolean,
   }
 
   interface JWT {
