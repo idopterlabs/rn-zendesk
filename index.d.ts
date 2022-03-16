@@ -23,6 +23,12 @@ declare module 'react-native-zendesk-v2' {
 
   // function to register notifications token with zendesk
   export function setNotificationToken(token: string): void;
+
+  // function to show to support form
+  export function startTicket(): void;
+
+  // function to list all tickets available 
+  export function showTicketList(): void;
   
   interface ChatOptions extends UserInfo {
     botName?: string

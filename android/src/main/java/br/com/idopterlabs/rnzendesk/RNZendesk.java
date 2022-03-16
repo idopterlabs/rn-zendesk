@@ -127,70 +127,93 @@ public class RNZendesk extends ReactContextBaseJavaModule {
     @ReactMethod
     public void setUserIdentity(ReadableMap options) {
         if (options.hasKey("token")) {
-          Identity identity = new JwtIdentity(options.getString("token"));
-          Zendesk.INSTANCE.setIdentity(identity);
-        } else {
-          String name = options.getString("name");
-          String email = options.getString("email");
-          Identity identity = new AnonymousIdentity.Builder()
-                  .withNameIdentifier(name).withEmailIdentifier(email).build();
-          Zendesk.INSTANCE.setIdentity(identity);
-        }   
+            Identity identity = new JwtIdentity(options.getString("token"));
+            Zendesk.INSTANCE.setIdentity(identity);
+        } else if (options.hasKey("name") && options.hasKey("email")) {
+            String name = options.getString("name");
+            String email = options.getString("email");
+            Identity identity = new AnonymousIdentity.Builder()
+                    .withNameIdentifier(name).withEmailIdentifier(email).build();
+            Zendesk.INSTANCE.setIdentity(identity);
+        }
     }
 
     @ReactMethod
     public void showHelpCenter(ReadableMap options) {
         String botName = options.hasKey("botName") ? options.getString("botName") : "Chat Bot";
         Activity activity = getCurrentActivity();
-        if (options.hasKey("withChat")) {
-            HelpCenterActivity.builder()
-             .withEngines(ChatEngine.engine())
-             .show(activity);
-        } else if (options.hasKey("disableTicketCreation")) {
-            HelpCenterActivity.builder()
-              .withContactUsButtonVisible(false)
-              .withShowConversationsMenuButton(false)
-              .show(activity, ViewArticleActivity.builder()
-                                                 .withContactUsButtonVisible(false)
-                                                 .config());
+        HelpCenterConfiguration.Builder helpCenterBuilder = HelpCenterActivity.builder();
+
+
+        if (options.hasKey("withChat") && options.getBoolean("withChat")) {
+            helpCenterBuilder.withEngines(ChatEngine.engine());
+        }
+
+        if (options.hasKey("disableTicketCreation") && options.getBoolean("disableTicketCreation")) {
+            helpCenterBuilder.withContactUsButtonVisible(false);
+            helpCenterBuilder.withShowConversationsMenuButton(false)
+                    .show(activity, ViewArticleActivity.builder()
+                            .withContactUsButtonVisible(false)
+                            .config());
         } else {
-            HelpCenterActivity.builder()
-             .show(activity);
+            helpCenterBuilder.show(activity);
         }
     }
 
     @ReactMethod
     public void startChat(ReadableMap options) {
-        Providers providers = Chat.INSTANCE.providers();
+        Activity activity = getCurrentActivity();
+
         setUserIdentity(options);
         setVisitorInfo(options);
-        setUserIdentity(options);
+
         String botName = options.getString("botName");
+
         ChatConfiguration chatConfiguration = ChatConfiguration.builder()
                 .withAgentAvailabilityEnabled(true)
                 .withOfflineFormEnabled(true)
                 .build();
 
-        Activity activity = getCurrentActivity();
-        if (options.hasKey("chatOnly")) {
-           MessagingActivity.builder()
-                    .withBotLabelString(botName)
-                    .withEngines(ChatEngine.engine(), SupportEngine.engine())
-                    .show(activity, chatConfiguration);
+        MessagingConfiguration.Builder messagingBuilder = MessagingActivity.builder();
+        messagingBuilder.withBotLabelString(botName);
+        if (options.hasKey("chatOnly") && options.getBoolean("chatOnly")) {
+            messagingBuilder.withEngines(ChatEngine.engine(), SupportEngine.engine());
         } else {
-            MessagingActivity.builder()
-                    .withBotLabelString(botName)
-                    .withEngines(AnswerBotEngine.engine(), ChatEngine.engine(), SupportEngine.engine())
-                    .show(activity, chatConfiguration);
+            messagingBuilder.withEngines(AnswerBotEngine.engine(), ChatEngine.engine(), SupportEngine.engine());
         }
-      
+
+        messagingBuilder.show(activity, chatConfiguration);
+    }
+
+    @ReactMethod
+    public void startTicket () {
+        Activity activity = getCurrentActivity();
+        RequestActivity.builder()
+                .show(activity);
+    }
+
+    @ReactMethod
+    public void showTicketList () {
+        Activity activity = getCurrentActivity();
+        RequestListActivity.builder()
+                .show(activity);
     }
 
     @ReactMethod
     public void setNotificationToken(String token) {
-        PushNotificationsProvider pushProvider = Chat.INSTANCE.providers().pushNotificationsProvider();
-        if (pushProvider != null) {
-            pushProvider.registerPushToken(token);
+        Providers providers = Chat.INSTANCE.providers();
+
+        if (providers == null) {
+            Log.d(TAG, "Providers is null");
+            return;
         }
+
+        PushNotificationsProvider pushProvider = providers.pushNotificationsProvider();
+        if (pushProvider == null) {
+            Log.d(TAG, "Push Provider is null");
+            return;
+        }
+
+        pushProvider.registerPushToken(token);
     }
 }

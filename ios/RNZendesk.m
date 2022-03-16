@@ -22,6 +22,7 @@ RCT_EXPORT_METHOD(setVisitorInfo:(NSDictionary *)options) {
   if (options[@"tags"]) {
     config.tags = options[@"tags"];
   }
+    
   config.visitorInfo = [[ZDKVisitorInfo alloc] initWithName:options[@"name"]
                                                 email:options[@"email"]
                                                 phoneNumber:options[@"phone"]];
@@ -57,6 +58,18 @@ RCT_EXPORT_METHOD(startChat:(NSDictionary *)options) {
   });
 }
 
+RCT_EXPORT_METHOD(startTicket) {
+  dispatch_sync(dispatch_get_main_queue(), ^{
+    [self startTicketFunction];
+  });
+}
+
+RCT_EXPORT_METHOD(showTicketList) {
+  dispatch_sync(dispatch_get_main_queue(), ^{
+    [self showTicketListFunction];
+  });
+}
+
 RCT_EXPORT_METHOD(showHelpCenter:(NSDictionary *)options) {
   [self setVisitorInfo:options];
   dispatch_sync(dispatch_get_main_queue(), ^{
@@ -64,13 +77,13 @@ RCT_EXPORT_METHOD(showHelpCenter:(NSDictionary *)options) {
   });
 }
 
-RCT_EXPORT_METHOD(setUserIdentity: (NSDictionary *)user) {
-  if (user[@"token"]) {
-    id<ZDKObjCIdentity> userIdentity = [[ZDKObjCJwt alloc] initWithToken:user[@"token"]];
+RCT_EXPORT_METHOD(setUserIdentity: (NSDictionary *)options) {
+  if (options[@"token"]) {
+    id<ZDKObjCIdentity> userIdentity = [[ZDKObjCJwt alloc] initWithToken:options[@"token"]];
     [[ZDKZendesk instance] setIdentity:userIdentity];
-  } else {
-    id<ZDKObjCIdentity> userIdentity = [[ZDKObjCAnonymous alloc] initWithName:user[@"name"] // name is nullable
-                                          email:user[@"email"]]; // email is nullable
+  } else if (options[@"name"] && options[@"email"]) {
+    id<ZDKObjCIdentity> userIdentity = [[ZDKObjCAnonymous alloc] initWithName:options[@"name"] // name is nullable
+                                          email:options[@"email"]]; // email is nullable
     [[ZDKZendesk instance] setIdentity:userIdentity];
   }
 }
@@ -133,10 +146,6 @@ RCT_EXPORT_METHOD(setNotificationToken:(NSData *)deviceToken) {
          articleUiConfig.showContactOptions = NO;
     }
     UIViewController* controller = [ZDKHelpCenterUi buildHelpCenterOverviewUiWithConfigs: @[helpCenterUiConfig, articleUiConfig]];
-    // controller.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle: @"Close"
-    //                                                                                    style: UIBarButtonItemStylePlain
-    //                                                                                   target: self
-    //                                                                                   action: @selector(chatClosedClicked)];
 
     UIViewController *topController = [UIApplication sharedApplication].keyWindow.rootViewController;
     while (topController.presentedViewController) {
@@ -195,6 +204,32 @@ RCT_EXPORT_METHOD(setNotificationToken:(NSData *)deviceToken) {
 
         UINavigationController *navControl = [[UINavigationController alloc] initWithRootViewController: chatController];
         [topController presentViewController:navControl animated:YES completion:nil];
+}
+
+- (void) startTicketFunction {
+    UIViewController* controller = [ZDKRequestUi buildRequestUi];
+
+
+    UIViewController *topController = [UIApplication sharedApplication].keyWindow.rootViewController;
+    while (topController.presentedViewController) {
+        topController = topController.presentedViewController;
+    }
+
+    UINavigationController *navControl = [[UINavigationController alloc] initWithRootViewController: controller];
+    [topController presentViewController:navControl animated:YES completion:nil];
+}
+
+- (void) showTicketListFunction {
+    UIViewController* controller = [ZDKRequestUi buildRequestList];
+
+
+    UIViewController *topController = [UIApplication sharedApplication].keyWindow.rootViewController;
+    while (topController.presentedViewController) {
+        topController = topController.presentedViewController;
+    }
+
+    UINavigationController *navControl = [[UINavigationController alloc] initWithRootViewController: controller];
+    [topController presentViewController:navControl animated:YES completion:nil];
 }
 
 - (void) chatClosedClicked {
