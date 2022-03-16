@@ -1,6 +1,6 @@
 {
 	"name": "@idopterlabs/rn-zendesk",
-	"version": "0.3.1",
+	"version": "0.3.2",
 	"description": "React Native Wrapper around Zendesk Chat",
 	"main": "index.js",
 	"types": "index.d.ts",
@@ -26,7 +26,10 @@
 	"bugs": "https://github.com/idopterlabs/rn-zendesk/issues",
 	"author": "idopterlabs",
 	"license": "MIT",
-	"devDependencies": { "prettier": "2.0.x", "eslint": "7.3.x" },
+	"devDependencies": {
+		"prettier": "2.0.x",
+		"eslint": "7.3.x"
+	},
 	"peerDependencies": {
 		"react": "^16.11.0",
 		"react-native": "0.60.x | 0.61.x | 0.62.x | 0.63.x"
