@@ -5,20 +5,29 @@ import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
+import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 import com.zendesk.logger.Logger;
+import com.zendesk.service.ErrorResponse;
+import com.zendesk.service.ZendeskCallback;
 
 import zendesk.answerbot.AnswerBot;
 import zendesk.answerbot.AnswerBotEngine;
+import zendesk.chat.Account;
+import zendesk.chat.AccountStatus;
 import zendesk.chat.Chat;
 import zendesk.chat.ChatConfiguration;
 import zendesk.chat.ChatEngine;
 import zendesk.chat.ChatProvider;
 import zendesk.chat.ChatProvidersConfiguration;
+import zendesk.chat.CompletionCallback;
+import zendesk.chat.JwtAuthenticator;
 import zendesk.chat.ProfileProvider;
 import zendesk.chat.Providers;
 import zendesk.chat.PushNotificationsProvider;
@@ -37,38 +46,62 @@ import zendesk.support.guide.ViewArticleActivity;
 import zendesk.support.request.RequestActivity;
 import zendesk.support.requestlist.RequestListActivity;
 
+@SuppressWarnings({"ConstantConditions", "unused"})
 public class RNZendesk extends ReactContextBaseJavaModule {
 
+    @SuppressWarnings("FieldMayBeFinal")
     private ReactContext appContext;
-    private static final String TAG = "ZendeskChat";
+    private static final String TAG_LOG = "RNZendesk";
+    private boolean isEnabledLoggable = false;
+    private boolean isEnabledJwtAuthenticator = false;
+    private JwtAuthenticator.JwtCompletion latestJwtCompletion;
 
     public RNZendesk(ReactApplicationContext reactContext) {
         super(reactContext);
         appContext = reactContext;
     }
 
+    @NonNull
     @Override
     public String getName() {
         return "RNZendesk";
     }
 
     @ReactMethod
+    public void init(ReadableMap options) {
+        if (options.hasKey("isEnabledLoggable") && options.getBoolean("isEnabledLoggable")) {
+            Logger.setLoggable(true);
+            isEnabledLoggable = true;
+        }
+
+        String appId = options.getString("appId");
+        String clientId = options.getString("clientId");
+        String url = options.getString("url");
+        String key = options.getString("key");
+        Context context = appContext;
+        Zendesk.INSTANCE.init(context, url, appId, clientId);
+        Support.INSTANCE.init(Zendesk.INSTANCE);
+        AnswerBot.INSTANCE.init(Zendesk.INSTANCE, Support.INSTANCE);
+        Chat.INSTANCE.init(context, key, appId);
+    }
+
+    @ReactMethod
     public void setVisitorInfo(ReadableMap options) {
         Providers providers = Chat.INSTANCE.providers();
         if (providers == null) {
-            Log.d(TAG, "Can't set visitor info, provider is null");
+            Log.d(TAG_LOG, "Can't set visitor info, provider is null");
             return;
         }
 
         ProfileProvider profileProvider = providers.profileProvider();
         if (profileProvider == null) {
-            Log.d(TAG, "Profile provider is null");
+            Log.d(TAG_LOG, "Profile provider is null");
             return;
         }
 
         ChatProvider chatProvider = providers.chatProvider();
         if (chatProvider == null) {
-            Log.d(TAG, "Chat provider is null");
+            Log.d(TAG_LOG, "Chat provider is null");
             return;
         }
 
@@ -102,32 +135,54 @@ public class RNZendesk extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void init(ReadableMap options) {
-        String appId = options.getString("appId");
-        String clientId = options.getString("clientId");
-        String url = options.getString("url");
-        String key = options.getString("key");
-        Context context = appContext;
-        Zendesk.INSTANCE.init(context, url, appId, clientId);
-        Support.INSTANCE.init(Zendesk.INSTANCE);
-        AnswerBot.INSTANCE.init(Zendesk.INSTANCE, Support.INSTANCE);
-        Chat.INSTANCE.init(context, key);
+    public void resetUserIdentity() {
+        Chat.INSTANCE.resetIdentity(result -> {
+            if (isEnabledLoggable) {
+                Log.d(TAG_LOG, "Reset user identity is done");
+            }
 
-        if (options.hasKey("isEnabledLoggable") && options.getBoolean("isEnabledLoggable")) {
-            Logger.setLoggable(true);
+            latestJwtCompletion = null;
+        });
+    }
+
+    @ReactMethod
+    public void updateUserToken(String token) {
+        if (latestJwtCompletion != null && isEnabledJwtAuthenticator) {
+            if (token.length() <= 0) {
+                latestJwtCompletion.onError();
+            } else {
+                latestJwtCompletion.onTokenLoaded(token);
+            }
+
+            latestJwtCompletion = null;
+            if (isEnabledLoggable) {
+                Log.d(TAG_LOG, "Request new token is done");
+            }
         }
     }
 
     @ReactMethod
-    public void initChat(String key) {
-        Context context = appContext;
-        Chat.INSTANCE.init(context, key);
-    }
+    public void setUserIdentity(ReadableMap options, Callback callbackNeedUpdateIdentity) {
+        if (options.hasKey("isEnabledJwtAuthenticator")) {
+            isEnabledJwtAuthenticator = options.getBoolean("isEnabledJwtAuthenticator");
+            if (isEnabledJwtAuthenticator) {
+                JwtAuthenticator jwtAuthenticator = jwtCompletion -> {
+                    if (isEnabledLoggable) {
+                        Log.d(TAG_LOG, "Request new token is start");
+                    }
 
-    @ReactMethod
-    public void setUserIdentity(ReadableMap options) {
+                    latestJwtCompletion = jwtCompletion;
+                    callbackNeedUpdateIdentity.invoke();
+                };
+                Chat.INSTANCE.setIdentity(jwtAuthenticator);
+            } else {
+                latestJwtCompletion = null;
+            }
+        }
+
         if (options.hasKey("token")) {
-            Identity identity = new JwtIdentity(options.getString("token"));
+            String token = options.getString("token");
+            Identity identity = new JwtIdentity(token);
             Zendesk.INSTANCE.setIdentity(identity);
         } else if (options.hasKey("name") && options.hasKey("email")) {
             String name = options.getString("name");
@@ -143,7 +198,6 @@ public class RNZendesk extends ReactContextBaseJavaModule {
         String botName = options.hasKey("botName") ? options.getString("botName") : "Chat Bot";
         Activity activity = getCurrentActivity();
         HelpCenterConfiguration.Builder helpCenterBuilder = HelpCenterActivity.builder();
-
 
         if (options.hasKey("withChat") && options.getBoolean("withChat")) {
             helpCenterBuilder.withEngines(ChatEngine.engine());
@@ -161,12 +215,32 @@ public class RNZendesk extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void startChatOrTicket(ReadableMap options) {
+        Providers providers = Chat.INSTANCE.providers();
+        providers.accountProvider().getAccount(new ZendeskCallback<Account>() {
+            @Override
+            public void onSuccess(Account account) {
+                if (account.getStatus() == AccountStatus.ONLINE) {
+                    startChat(options);
+                } else {
+                    startTicket();
+                }
+            }
+
+            @Override
+            public void onError(ErrorResponse errorResponse) {
+                if (isEnabledLoggable) {
+                    Log.d(TAG_LOG, "Error request getAccount (" + errorResponse.getStatus() + "): " + errorResponse.getResponseBody());
+                }
+
+                startTicket();
+            }
+        });
+    }
+
+    @ReactMethod
     public void startChat(ReadableMap options) {
         Activity activity = getCurrentActivity();
-
-        setUserIdentity(options);
-        setVisitorInfo(options);
-
         String botName = options.getString("botName");
 
         ChatConfiguration chatConfiguration = ChatConfiguration.builder()
@@ -176,6 +250,7 @@ public class RNZendesk extends ReactContextBaseJavaModule {
 
         MessagingConfiguration.Builder messagingBuilder = MessagingActivity.builder();
         messagingBuilder.withBotLabelString(botName);
+
         if (options.hasKey("chatOnly") && options.getBoolean("chatOnly")) {
             messagingBuilder.withEngines(ChatEngine.engine(), SupportEngine.engine());
         } else {
@@ -186,14 +261,14 @@ public class RNZendesk extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void startTicket () {
+    public void startTicket() {
         Activity activity = getCurrentActivity();
         RequestActivity.builder()
                 .show(activity);
     }
 
     @ReactMethod
-    public void showTicketList () {
+    public void showTicketList() {
         Activity activity = getCurrentActivity();
         RequestListActivity.builder()
                 .show(activity);
@@ -204,16 +279,28 @@ public class RNZendesk extends ReactContextBaseJavaModule {
         Providers providers = Chat.INSTANCE.providers();
 
         if (providers == null) {
-            Log.d(TAG, "Providers is null");
+            if (isEnabledLoggable) {
+                Log.d(TAG_LOG, "Providers is null");
+            }
             return;
         }
 
         PushNotificationsProvider pushProvider = providers.pushNotificationsProvider();
         if (pushProvider == null) {
-            Log.d(TAG, "Push Provider is null");
+            if (isEnabledLoggable) {
+                Log.d(TAG_LOG, "Push Provider is null");
+            }
             return;
         }
 
         pushProvider.registerPushToken(token);
     }
+
+    @ReactMethod
+    public void setPrimaryColor(String token) {
+        if (isEnabledLoggable) {
+            Log.d(TAG_LOG, "Not support in Android Version");
+        }
+    }
+
 }

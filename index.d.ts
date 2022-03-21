@@ -1,16 +1,28 @@
-declare module 'react-native-zendesk-v2' {
-
-  // function to display chat box
-  export function startChat(chatOptions: ChatOptions): void;
+declare module '@idopterlabs/rn-zendesk' {
 
   // normal init function when you want to use all of the sdks
   export function init(initializationOptins: InitOptions): void;
 
-  // init function when you just want to use chat sdk
-  export function initChat(accountKey: string): void;
+  // function to display chat box
+  export function startChat(chatOptions: ChatOptions): void;
 
-  // set jwt token for authentication when you want to use chat sdk
-  export function setUserIdentity(accountKey: JWT): void;
+  // function to show to support form
+  export function startTicket(): void;
+
+  // function to list all tickets available 
+  export function showTicketList(): void;
+
+  // function to display chat if you have online agent or support form
+  export function startChatOrTicket(chatOptions: ChatOptions): void;
+
+  // function to request the generation of a new token in chat
+  type CallbackRequestNewToken = () => void;
+
+  // set user identity for authentication when you want to use chat or ticket sdk
+  export function setUserIdentity(identity: Identity, onRequestNewToken: CallbackRequestNewToken): void;
+
+  // set a new token for the chat
+  export function updateUserToken(newToken: string): void;
 
   // function to set primary color code for the chat theme, pass hex code of the color here
   export function setPrimaryColor(color: string): void;
@@ -23,14 +35,8 @@ declare module 'react-native-zendesk-v2' {
 
   // function to register notifications token with zendesk
   export function setNotificationToken(token: string): void;
-
-  // function to show to support form
-  export function startTicket(): void;
-
-  // function to list all tickets available 
-  export function showTicketList(): void;
   
-  interface ChatOptions extends UserInfo {
+  interface ChatOptions {
     botName?: string
     // boolean value if you want just chat sdk or want to use all the sdk like support, answer bot and chat
     // true value means just chat sdk
@@ -57,18 +63,25 @@ declare module 'react-native-zendesk-v2' {
     isEnabledLoggable?: boolean,
   }
 
-  interface JWT {
+  interface IdentityUser {
+    // user name
+    name: string,
+    // user email
+    email: string,
+  }
+
+  interface IdentityJwt {
     // jwt token
-    token?: string,
-    name?: string,
-    email?: string,
+    token: string,
+    // enabled jwt authentication in chat
+    isEnabledJwtAuthenticator?: boolean,
   }
 
   interface UserInfo {
      // user's name
-    name: string
+    name?: string
     // user's email
-    email: string
+    email?: string
     // user's phone
     phone?: number
     // department to redirect the chat
@@ -77,4 +90,5 @@ declare module 'react-native-zendesk-v2' {
     tags?: Array<string>
   }
 
+  type Identity = IdentityJwt | IdentityUser;
 }
