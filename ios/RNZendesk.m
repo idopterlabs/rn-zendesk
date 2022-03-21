@@ -9,11 +9,14 @@
 #import <SupportSDK/SupportSDK.h>
 #import <SupportProvidersSDK/SupportProvidersSDK.h>
 #import <ZendeskCoreSDK/ZendeskCoreSDK.h>
+#import <React/RCTBridgeModule.h>
 
-@implementation RNZendesk
-
+NSString *TAG_LOG = @"RNZendesk";
 bool isEnabledLoggable = false;
 bool isEnabledJwtAuthenticator = false;
+GetTokenCompletion latestJwtCompletion;
+
+@implementation RNZendesk
 
 RCT_EXPORT_MODULE()
 
@@ -24,12 +27,15 @@ RCT_EXPORT_METHOD(init:(NSDictionary *)options) {
         isEnabledLoggable = true;
     }
     
-    [ZDKZendesk initializeWithAppId:options[@"appId"]
+    [ZDKZendesk initializeWithAppId: options[@"appId"]
                            clientId: options[@"clientId"]
                          zendeskUrl: options[@"url"]];
     [ZDKSupport initializeWithZendesk: [ZDKZendesk instance]];
-    [ZDKAnswerBot initializeWithZendesk:[ZDKZendesk instance] support:[ZDKSupport instance]];
-    [ZDKChat initializeWithAccountKey:options[@"key"] appId:options[@"appId"] queue:dispatch_get_main_queue()];
+    [ZDKAnswerBot initializeWithZendesk: [ZDKZendesk instance]
+                                support:[ZDKSupport instance]];
+    [ZDKChat initializeWithAccountKey: options[@"key"]
+                                appId: options[@"appId"]
+                                queue: dispatch_get_main_queue()];
 }
 
 RCT_EXPORT_METHOD(setVisitorInfo:(NSDictionary *)options) {
@@ -48,40 +54,46 @@ RCT_EXPORT_METHOD(setVisitorInfo:(NSDictionary *)options) {
     ZDKChat.instance.configuration = config;
     
     if (isEnabledLoggable) {
-        NSLog(@"Setting visitor info: department: %@ tags: %@, email: %@, name: %@, phone: %@", config.department, config.tags, config.visitorInfo.email, config.visitorInfo.name, config.visitorInfo.phoneNumber);
+        NSLog(@"%@: Setting visitor info: department: %@ tags: %@, email: %@, name: %@, phone: %@", TAG_LOG, config.department, config.tags, config.visitorInfo.email, config.visitorInfo.name, config.visitorInfo.phoneNumber);
     }
 }
 
 RCT_EXPORT_METHOD(resetUserIdentity) {
     [[ZDKChat instance] resetIdentity:^{
         if (isEnabledLoggable) {
-            NSLog(@"Reset user identity is done");
+            NSLog(@"%@: Reset user identity is done", TAG_LOG);
         }
         
-        // latestJwtCompletion = null;
+        latestJwtCompletion = nil;
     }];
 }
 
 RCT_EXPORT_METHOD(updateUserToken: (NSString *) token) {
-    // if (latestJwtCompletion && isEnabledJwtAuthenticator) {
     if (isEnabledJwtAuthenticator) {
         if (token && token.length <= 0) {
-            // TODO ??
+            NSError *error = [NSError errorWithDomain:@"Not found token"
+                                                 code: 100
+                                             userInfo:@{
+                NSLocalizedDescriptionKey:@"Not found token"
+            }];
+            latestJwtCompletion(nil, error);
         } else {
-            // TODO ??
+            latestJwtCompletion(token, nil);
+        }
+        
+        latestJwtCompletion = nil;
+        if (isEnabledLoggable) {
+            NSLog(@"%@: Request new token is done", TAG_LOG);
         }
     }
 }
 
-// TODO: resetUserIdentity
-
-// TODO: updateUserToken
-
-RCT_EXPORT_METHOD(setUserIdentity: (NSDictionary *)options) {
+RCT_EXPORT_METHOD(setUserIdentity: (NSDictionary *)options callback: (RCTResponseSenderBlock)callback) {
     if (options[@"isEnabledJwtAuthenticator"]) {
         isEnabledJwtAuthenticator = options[@"isEnabledJwtAuthenticator"];
         if (isEnabledJwtAuthenticator) {
             ZDKJWTAuth *authenticator = [ZDKJWTAuth new];
+            [authenticator setCallbackReactNative:callback];
             [[ZDKChat instance] setIdentityWithAuthenticator:authenticator];
         }
     }
@@ -97,13 +109,17 @@ RCT_EXPORT_METHOD(setUserIdentity: (NSDictionary *)options) {
 }
 
 RCT_EXPORT_METHOD(showHelpCenter:(NSDictionary *)options) {
-    [self setVisitorInfo:options];
     dispatch_sync(dispatch_get_main_queue(), ^{
         [self showHelpCenterFunction:options];
     });
 }
 
-// TODO: startChatOrTicket
+RCT_EXPORT_METHOD(startChatOrTicket:(NSDictionary *)options) {
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        [self startChatOrTicketFunction:options];
+    });
+}
+
 
 RCT_EXPORT_METHOD(startChat:(NSDictionary *)options) {
     dispatch_sync(dispatch_get_main_queue(), ^{
@@ -143,17 +159,16 @@ RCT_EXPORT_METHOD(setPrimaryColor:(NSString *)color) {
 
 - (void) showHelpCenterFunction:(NSDictionary *)options {
     NSError *error = nil;
-    ZDKChatEngine *chatEngine = [ZDKChatEngine engineAndReturnError:&error];
-    ZDKSupportEngine *supportEngine = [ZDKSupportEngine engineAndReturnError:&error];
     NSArray *engines = @[];
-    ZDKMessagingConfiguration *messagingConfiguration = [ZDKMessagingConfiguration new];
     NSString *botName = @"ChatBot";
     if (options[@"botName"]) {
         botName = options[@"botName"];
     }
+    
     if (options[@"withChat"]) {
         engines = @[(id <ZDKEngine>) [ZDKChatEngine engineAndReturnError:&error]];
     }
+    
     ZDKHelpCenterUiConfiguration* helpCenterUiConfig = [ZDKHelpCenterUiConfiguration new];
     helpCenterUiConfig.objcEngines = engines;
     ZDKArticleUiConfiguration* articleUiConfig = [ZDKArticleUiConfiguration new];
@@ -162,6 +177,7 @@ RCT_EXPORT_METHOD(setPrimaryColor:(NSString *)color) {
         helpCenterUiConfig.showContactOptions = NO;
         articleUiConfig.showContactOptions = NO;
     }
+    
     UIViewController* controller = [ZDKHelpCenterUi buildHelpCenterOverviewUiWithConfigs: @[helpCenterUiConfig, articleUiConfig]];
     
     UIViewController *topController = [UIApplication sharedApplication].keyWindow.rootViewController;
@@ -173,12 +189,34 @@ RCT_EXPORT_METHOD(setPrimaryColor:(NSString *)color) {
     [topController presentViewController:navControl animated:YES completion:nil];
 }
 
+- (void) startChatOrTicketFunction:(NSDictionary *)options {
+    [ZDKChat.accountProvider getAccount:^(ZDKChatAccount *account, NSError *error) {
+        if (account) {
+            switch (account.accountStatus) {
+                case ZDKChatAccountStatusOnline:
+                    [self startChatFunction:options];
+                    break;
+                default:
+                    [self startTicketFunction];
+                    break;
+            }
+        } else {
+            if (isEnabledLoggable) {
+                NSLog(@"%@: Error request getAccount: %@", TAG_LOG, error);
+            }
+            
+            [self startTicketFunction];
+        }
+    }];
+}
+
 - (void) startChatFunction:(NSDictionary *)options {
     ZDKMessagingConfiguration *messagingConfiguration = [ZDKMessagingConfiguration new];
     NSString *botName = @"ChatBot";
     if (options[@"botName"]) {
         botName = options[@"botName"];
     }
+    
     messagingConfiguration.name = botName;
     
     if (options[@"botImage"]) {
@@ -187,34 +225,35 @@ RCT_EXPORT_METHOD(setPrimaryColor:(NSString *)color) {
     
     NSError *error = nil;
     NSMutableArray *engines = [[NSMutableArray alloc] init];
-    if (options[@"chatOnly"]) {
-        engines = @[
-            (id <ZDKEngine>) [ZDKChatEngine engineAndReturnError:&error]
-        ];
-    } else {
-        engines = @[
-            (id <ZDKEngine>) [ZDKAnswerBotEngine engineAndReturnError:&error],
-            (id <ZDKEngine>) [ZDKChatEngine engineAndReturnError:&error],
-            (id <ZDKEngine>) [ZDKSupportEngine engineAndReturnError:&error],
-        ];
+    
+    [engines addObject:(id <ZDKEngine>) [ZDKChatEngine engineAndReturnError:&error]];
+    [engines addObject:(id <ZDKEngine>) [ZDKSupportEngine engineAndReturnError:&error]];
+    
+    if (!options[@"chatOnly"]) {
+        [engines addObject:(id <ZDKEngine>) [ZDKAnswerBotEngine engineAndReturnError:&error]];
     }
-
+    
     ZDKChatConfiguration *chatConfiguration = [[ZDKChatConfiguration alloc] init];
     chatConfiguration.isPreChatFormEnabled = YES;
     chatConfiguration.isAgentAvailabilityEnabled = YES;
     
-    UIViewController *chatController =[ZDKMessaging.instance buildUIWithEngines:engines
-                                                                        configs:@[messagingConfiguration, chatConfiguration]
-                                                                          error:&error];
+    UIViewController *chatController = [ZDKMessaging.instance buildUIWithEngines: engines
+                                                                        configs: @[messagingConfiguration, chatConfiguration]
+                                                                          error: &error];
     if (error && isEnabledLoggable) {
-        NSLog(@"Error occured %@", error);
+        NSLog(@"%@: Error occured %@", TAG_LOG, error);
     }
-    chatController.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle: @"Close"
-                                                                                       style: UIBarButtonItemStylePlain
-                                                                                      target: self
-                                                                                      action: @selector(chatClosedClicked)];
     
-    
+    if (@available(iOS 13.0, *)) {
+        chatController.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem: UIBarButtonSystemItemClose
+                                                                                                        target: self
+                                                                                                        action: @selector(chatClosedClicked)];
+    } else {
+        chatController.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem: UIBarButtonSystemItemCancel
+                                                                                                        target: self
+                                                                                                        action: @selector(chatClosedClicked)];
+    }
+
     UIViewController *topController = [UIApplication sharedApplication].keyWindow.rootViewController;
     while (topController.presentedViewController) {
         topController = topController.presentedViewController;
@@ -227,13 +266,13 @@ RCT_EXPORT_METHOD(setPrimaryColor:(NSString *)color) {
 - (void) startTicketFunction {
     UIViewController* controller = [ZDKRequestUi buildRequestUi];
     
-    
     UIViewController *topController = [UIApplication sharedApplication].keyWindow.rootViewController;
     while (topController.presentedViewController) {
         topController = topController.presentedViewController;
     }
     
     UINavigationController *navControl = [[UINavigationController alloc] initWithRootViewController: controller];
+    
     [topController presentViewController:navControl animated:YES completion:nil];
 }
 
@@ -266,13 +305,20 @@ RCT_EXPORT_METHOD(setPrimaryColor:(NSString *)color) {
 
 @implementation ZDKJWTAuth
 
-- (void)setCallback:(void (^)(NSString * _Nullable))completion {
-    Aaa = completion;
+- (void)setCallbackReactNative: (RCTResponseSenderBlock)callbackReactNative {
+    onRequestNewTokenCallback = callbackReactNative;
 }
 
-- (void)getToken:(void (^ _Nonnull)(NSString * _Nullable, NSError * _Nullable))completion {
-    NSString *token = [Aaa self]; // TODO
-    completion(token, NULL);
+- (void)getToken: (GetTokenCompletion)completion {
+    if (isEnabledLoggable) {
+        NSLog(@"%@: %@", TAG_LOG, @"Request new token is start");
+    }
+    
+    latestJwtCompletion = completion;
+    if (onRequestNewTokenCallback != nil) {
+        onRequestNewTokenCallback(@[]);
+    }
 }
 
 @end
+

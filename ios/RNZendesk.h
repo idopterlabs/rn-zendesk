@@ -1,7 +1,11 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import <React/RCTBridgeModule.h>
+#import <React/RCTViewManager.h>
 #import <ChatProvidersSDK/ChatProvidersSDK.h>
+#import <React/RCTConvert.h>
+
+typedef void (^GetTokenCompletion)(NSString * _Nullable, NSError * _Nullable);
 
 @interface RNZendesk : NSObject<RCTBridgeModule>
 
@@ -10,10 +14,11 @@
 @interface ZDKJWTAuth: NSObject<ZDKJWTAuthenticator>
 
 {
-    id Aaa;
+    RCTResponseSenderBlock onRequestNewTokenCallback;
 }
 
-- (void)setCallback:(void (^ _Nonnull)(NSString *_Nullable token))completion;
-- (void)getToken:(void (^ _Nonnull)(NSString * _Nullable, NSError * _Nullable))completion;
+- (void)setCallbackReactNative: (RCTResponseSenderBlock)callbackReactNative;
+- (void)getToken: (GetTokenCompletion)completion;
 
 @end
+
