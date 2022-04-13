@@ -1,34 +1,54 @@
 {
-	"name": "@idopterlabs/rn-zendesk",
-	"version": "0.2.1",
-	"description": "React Native Wrapper around Zendesk Chat",
-	"main": "index.js",
-	"types": "index.d.ts",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/idopterlabs/rn-zendesk"
-	},
-	"scripts": {
-		"prettier": "prettier",
-		"prettier:all": "prettier --write '**/*.json' '**/*.js' '**/*.ts' ",
-		"lint": "eslint"
-	},
-	"keywords": [
-		"zendesk",
-		"chat",
-		"react-native",
-		"react",
-		"ios",
-		"android",
-		"react-component"
-	],
-	"homepage": "https://github.com/idopterlabs/rn-zendesk.git",
-	"bugs": "https://github.com/idopterlabs/rn-zendesk/issues",
-	"author": "idopterlabs",
-	"license": "MIT",
-	"devDependencies": { "prettier": "2.0.x", "eslint": "7.3.x" },
-	"peerDependencies": {
-		"react": "^16.11.0",
-		"react-native": "0.60.x | 0.61.x | 0.62.x | 0.63.x"
-	}
+  "name": "@idopterlabs/rn-zendesk",
+  "main": "index.js",
+  "preferGlobal": false,
+  "version": "0.2.1",
+  "description": "React Native Wrapper around Zendesk Chat",
+  "license": "MIT",
+  "keywords": [
+    "android",
+    "chat",
+    "ios",
+    "react",
+    "react-component",
+    "react-native",
+    "zendesk"
+  ],
+  "scripts": {
+    "lint": "eslint",
+    "docs": "typedoc --plugin typedoc-plugin-extras --options typedoc.json index.d.ts",
+    "prettier": "prettier",
+    "prettier:all": "prettier --write '**/*.json' '**/*.js' '**/*.ts' "
+  },
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/idopterlabs/rn-zendesk"
+  },
+  "homepage": "https://github.com/idopterlabs/rn-zendesk.git",
+  "bugs": {
+    "url": "https://github.com/idopterlabs/rn-zendesk/issues"
+  },
+  "files": [
+    ".gitignore",
+    "LICENSE",
+    "RNZendesk.podspec",
+    "android",
+    "index.d.ts",
+    "index.js",
+    "ios",
+    "package.json"
+  ],
+  "devDependencies": {
+    "eslint": "7.3.x",
+    "prettier": "2.0.x",
+    "typedoc": "^0.22.15",
+    "typedoc-plugin-extras": "^2.2.3",
+    "typescript": "^4.6.3"
+  },
+  "peerDependencies": {
+    "react": "^16.11.0",
+    "react-native": "0.60.x | 0.61.x | 0.62.x | 0.63.x"
+  },
+  "types": "index.d.ts"
 }
