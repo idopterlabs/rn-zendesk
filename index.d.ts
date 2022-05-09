@@ -6,7 +6,13 @@ declare module '@idopterlabs/rn-zendesk' {
   // function to display chat box
   export function startChat(chatOptions: ChatOptions): void;
 
-  // function to show to support form
+  /** 
+   *  function to show to support form
+   * @example
+   * ```ts
+   * zendesk.startTicket();
+   * ```
+   */
   export function startTicket(): void;
 
   // function to list all tickets available 
