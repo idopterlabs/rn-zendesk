@@ -4,5 +4,6 @@
 	"includeVersion": true,
 	"hideGenerator": true,
 	"out": "docs",
-	"readme": "Documentation.md"
+	"readme": "documentation/README.md",
+  "media": "documentation/screenshot"
 }

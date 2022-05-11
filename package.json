@@ -18,7 +18,7 @@
     "lint": "eslint",
     "docs": "typedoc --plugin typedoc-plugin-extras --options typedoc.json index.d.ts",
     "prettier": "prettier",
-    "prettier:all": "prettier --write '**/*.json' '**/*.js' '**/*.ts' "
+    "prettier:all": "prettier  --write '**/*.json' '**/*.js' '**/*.ts' "
   },
   "private": false,
   "repository": {
