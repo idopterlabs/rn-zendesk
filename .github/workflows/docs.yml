@@ -1,0 +1,33 @@
+name: Node.js CI
+on:
+  push:
+    branches: [ main, feature/documentation ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - name: Install packages
+      uses: borales/actions-yarn@v2.3.0
+      with:
+        cmd: install
+    - name: Create the docs directory locally in CI
+      uses: borales/actions-yarn@v2.3.0
+      with:
+        cmd: docs
+    - name: Deploy 🚀
+      uses: JamesIves/github-pages-deploy-action@4.1.4
+      with:
+        branch: gh-pages
+        folder: docs

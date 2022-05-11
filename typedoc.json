@@ -1,0 +1,9 @@
+{
+	"customTitle": "Idopterlabs - React Native Zendesk Package",
+	"name": "React Native Zendesk (@idopterlabs/rn-zendesk)",
+	"includeVersion": true,
+	"hideGenerator": true,
+	"out": "docs",
+	"readme": "documentation/README.md",
+  "media": "documentation/screenshot"
+}

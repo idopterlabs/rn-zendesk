@@ -1,94 +1,185 @@
 declare module '@idopterlabs/rn-zendesk' {
+  /**
+   * Initialize the SDK
+   * @param initializationOptions Startup and Access Settings
+   * 
+   * @example
+   * ```ts
+   * RNZendesk.init({
+   *  key: 'ip1MZws0A17aDjg8wjfs2sfQ8AeUJFe5',
+   *  appId: 'd89309417eb165b6b5041234371c16a5bsjfc2f49a027b4c',
+   *  clientId: 'mobile_sdk_client_9326b42367cca4c2d2f',
+   *  url: 'https://MY_ZENDESK.zendesk.com',
+   *  isEnabledLoggable: false,
+   * });
+   * ```
+   */
+  export function init(initializationOptions: InitOptions): void;
 
-  // normal init function when you want to use all of the sdks
-  export function init(initializationOptins: InitOptions): void;
-
-  // function to display chat box
+  /**
+   * Open the chat
+   * @param chatOptions Chat settings
+   * 
+   * @example
+   * ```ts
+   * RNZendesk.startChat({});
+   * ```
+   */
   export function startChat(chatOptions: ChatOptions): void;
 
-  // function to show to support form
+  /** 
+   * Open the ticket form
+   * @example
+   * ```ts
+   * RNZendesk.startTicket();
+   * ```
+   */
   export function startTicket(): void;
 
-  // function to list all tickets available 
+  /** 
+   * Open the page with all user tickets
+   * @example
+   * ```ts
+   * RNZendesk.showTicketList();
+   * ```
+   */
   export function showTicketList(): void;
 
-  // function to display chat if you have online agent or support form
+  /** 
+   * Display chat if you have online agent or ticket form
+   * @param chatOptions Chat settings
+   * 
+   * @example
+   * ```ts
+   * RNZendesk.startChatOrTicket({});
+   * ```
+   */
   export function startChatOrTicket(chatOptions: ChatOptions): void;
 
-  // function to request the generation of a new token in chat
-  type CallbackRequestNewToken = () => void;
+  // Callback interface to request the generation of a new token in chat
+  export type CallbackRequestNewToken = () => void;
 
-  // set user identity for authentication when you want to use chat or ticket sdk
+  /** 
+   * Set user identity for authentication when you want to use chat or ticket sdk
+   * @param chatOptions Chat settings
+   * 
+   * @example
+   * ```ts
+   * RNZendesk.setUserIdentity({
+   *  token: '1234567890abcdef',
+   *  isEnabledJwtAuthenticator: true
+   * }, async () => {
+   *  RNZendesk.updateUserToken('1234567890abcdef');
+   * });
+   * ```
+   */
   export function setUserIdentity(identity: Identity, onRequestNewToken: CallbackRequestNewToken): void;
 
-  // set a new token for the chat
+  /** 
+   * Set a new token for the chat
+   * @param newToken Token string
+   * 
+   * @example
+   * ```ts
+   * RNZendesk.updateUserToken('1234567890abcdef');
+   * ```
+   */
   export function updateUserToken(newToken: string): void;
 
-  // function to set primary color code for the chat theme, pass hex code of the color here
+  /** 
+   * Set primary color code for the chat theme
+   * @param color HEX Color String
+   * 
+   * @example
+   * ```ts
+   * RNZendesk.setPrimaryColor('#3762ff');
+   * ```
+   */
   export function setPrimaryColor(color: string): void;
 
-  // function to display help center UI
+  /** 
+   * Open the help center
+   * @param chatOptions Chat settings
+   * 
+   * @example
+   * ```ts
+   * RNZendesk.showHelpCenter({});
+   * ```
+   */
   export function showHelpCenter(chatOptions: ChatOptions): void;
 
-  // function to set visitor info in chat
+  /** 
+   * Set visitor info in chat
+   * @param visitorInfo User info
+   * 
+   * @example
+   * ```ts
+   * RNZendesk.setVisitorInfo({});
+   * ```
+   */
   export function setVisitorInfo(visitorInfo: UserInfo): void;
 
-  // function to register notifications token with zendesk
+  /** 
+   * Register notifications token with zendesk
+   * @param token Token string
+   * 
+   * @example
+   * ```ts
+   * RNZendesk.setNotificationToken('123456');
+   * ```
+   */
   export function setNotificationToken(token: string): void;
   
-  interface ChatOptions {
+  export interface ChatOptions {
+    // Name bot
     botName?: string
-    // boolean value if you want just chat sdk or want to use all the sdk like support, answer bot and chat
-    // true value means just chat sdk
-    chatOnly?: boolean
-    // hex code color to set on chat
-    color?: string
-    /* help center specific props only */
-    // sent in help center function only to show help center with/without chat
+    // Show only chat without support, answer bot
+    chatOnly?: boolean 
+    // Sent in help center function only to show help center with chat
     withChat?: boolean
-    // to enable/disable ticket creation in help center
+    // Disable ticket creation in help center
     disableTicketCreation?: boolean
   }
 
-  interface InitOptions {
-    // chat key of zendesk account to init chat
+  export interface InitOptions {
+    // Chat key of zendesk account to init chat
     key: string,
-    // appId of your zendesk account
+    // AppId of your zendesk account
     appId: string,
-    // clientId of your zendesk account
+    // ClientId of your zendesk account
     clientId: string,
-    // support url of zendesk account
+    // Support url of zendesk account
     url: string,
-    // enable debug mode of zendesk sdk
+    // Enable debug mode of zendesk sdk
     isEnabledLoggable?: boolean,
   }
 
-  interface IdentityUser {
-    // user name
+  export interface IdentityUser {
+    // User name
     name: string,
-    // user email
+    // User email
     email: string,
   }
 
-  interface IdentityJwt {
-    // jwt token
+  export interface IdentityJwt {
+    // JWT token
     token: string,
-    // enabled jwt authentication in chat
+    // Enabled jwt authentication in chat
     isEnabledJwtAuthenticator?: boolean,
   }
 
-  interface UserInfo {
-     // user's name
+  export interface UserInfo {
+     // User's name
     name?: string
-    // user's email
+    // User's email
     email?: string
-    // user's phone
+    // User's phone
     phone?: number
-    // department to redirect the chat
+    // Department to redirect the chat
     department?: string
-    // tags for chat
+    // Tags for chat
     tags?: Array<string>
   }
 
-  type Identity = IdentityJwt | IdentityUser;
+  export type Identity = IdentityJwt | IdentityUser;
 }
