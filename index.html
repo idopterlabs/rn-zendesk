@@ -1,0 +1,74 @@
+<!DOCTYPE html><html class="default"><head><meta charSet="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>React Native Zendesk (@idopterlabs/rn-zendesk) - v0.5.0</title><meta name="description" content="Documentation for React Native Zendesk (@idopterlabs/rn-zendesk) - v0.5.0"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="assets/style.css"/><link rel="stylesheet" href="assets/highlight.css"/><script async src="assets/search.js" id="search-script"></script></head><body><script>document.body.classList.add(localStorage.getItem("tsd-theme") || "os")</script><header><div class="tsd-page-toolbar"><div class="container"><div class="table-wrap"><div class="table-cell" id="tsd-search" data-base="."><div class="field"><label for="tsd-search-field" class="tsd-widget search no-caption">Search</label><input type="text" id="tsd-search-field"/></div><ul class="results"><li class="state loading">Preparing search index...</li><li class="state failure">The search index is not available</li></ul><a href="index.html" class="title">Idopterlabs - React Native Zendesk Package</a></div><div class="table-cell" id="tsd-widgets"><div id="tsd-filter"><a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a><div class="tsd-filter-group"><div class="tsd-select" id="tsd-filter-visibility"><span class="tsd-select-label">All</span><ul class="tsd-select-list"><li data-value="public">Public</li><li data-value="protected">Public/Protected</li><li data-value="private" class="selected">All</li></ul></div> <input type="checkbox" id="tsd-filter-inherited" checked/><label class="tsd-widget" for="tsd-filter-inherited">Inherited</label><input type="checkbox" id="tsd-filter-externals" checked/><label class="tsd-widget" for="tsd-filter-externals">Externals</label></div></div><a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a></div></div></div></div><div class="tsd-page-title"><div class="container"><h1>React Native Zendesk (@idopterlabs/rn-zendesk) - v0.5.0 </h1></div></div></header><div class="container container-main"><div class="row"><div class="col-8 col-content"><div class="tsd-panel tsd-typography">
+<a href="#documentation" id="documentation" style="color: inherit; text-decoration: none;">
+  <h1>Documentation</h1>
+</a>
+
+<a href="#features" id="features" style="color: inherit; text-decoration: none;">
+  <h2>Features</h2>
+</a>
+<p>Supported Zendesk Features</p>
+<ul>
+<li>Zendesk Chat</li>
+<li>Zendesk Support</li>
+<li>Zendesk Help Center</li>
+<li>Zendesk Analytics</li>
+</ul>
+
+<a href="#installation" id="installation" style="color: inherit; text-decoration: none;">
+  <h2>Installation</h2>
+</a>
+<p>Module available through the <a href="https://www.npmjs.com/">npm registry</a>. It can be installed using the <a href="https://docs.npmjs.com/getting-started/installing-npm-packages-locally"><code>npm</code></a> or <a href="https://yarnpkg.com/en/"><code>yarn</code></a> command line tool.</p>
+<pre><code class="language-sh"><span class="hl-5"># Yarn (Recommended)</span><br/><span class="hl-1">yarn add @idopterlabs/rn-zendesk</span><br/><span class="hl-5"># NPM </span><br/><span class="hl-1">npm install @idopterlabs/rn-zendesk --save</span>
+</code></pre>
+
+<a href="#settings-zendesk" id="settings-zendesk" style="color: inherit; text-decoration: none;">
+  <h2>Settings Zendesk</h2>
+</a>
+<p>Configuring Zendesk to work with <code>@idopterlabs/rn-zendesk</code>.</p>
+<p>First create an access for your app in <code>Admin Panel</code> &gt;&gt; <code>Channels</code> &gt;&gt; <code>Mobile SDK</code> &gt;&gt; <code>Add App</code> and copy access credentials:</p>
+<p><img src="media/SettingsMobile.png" alt="SettingsMobile"></p>
+<p>You need to get the account key in <code>Admin Panel</code> &gt;&gt; <code>Zendesk Products</code> (Button found at top right) &gt;&gt; <code>Chat</code> &gt;&gt; Profile Picture &gt;&gt; <code>Check connection</code>:</p>
+<p><img src="media/SettingsChatPanel.png" alt="SettingsChatPanel"></p>
+<p><img src="media/SettingsAccountKey.png" alt="SettingsAccountKey"></p>
+
+<a href="#using-the-sdk" id="using-the-sdk" style="color: inherit; text-decoration: none;">
+  <h2>Using the SDK</h2>
+</a>
+<p>First you must <a href="#settings-zendesk">obtain the access settings</a> and set via <a href="modules.html#init"><code>.init(...)</code></a>. After that you can use the zendesk features.</p>
+<p><strong>Zendesk Chat</strong></p>
+<ul>
+<li><a href="modules.html#startChat"><code>.startChat(...)</code></a>: Open the chat</li>
+</ul>
+<p><strong>Zendesk Support</strong></p>
+<ul>
+<li><a href="modules.html#startTicket"><code>.startTicket()</code></a>: Open the ticket form</li>
+<li><a href="modules.html#showTicketList"><code>.showTicketList()</code></a>: Open the page with all user tickets</li>
+</ul>
+<p><strong>Zendesk Help Center</strong></p>
+<ul>
+<li><a href="modules.html#showHelpCenter"><code>.showHelpCenter()</code></a>: Open the help center</li>
+</ul>
+<p><strong>Zendesk Analytics</strong></p>
+<ul>
+<li><a href="modules.html#setVisitorInfo"><code>.setVisitorInfo(...)</code></a>: Save information about who is using the app</li>
+</ul>
+
+<a href="#style-customization" id="style-customization" style="color: inherit; text-decoration: none;">
+  <h2>Style customization</h2>
+</a>
+
+<a href="#android" id="android" style="color: inherit; text-decoration: none;">
+  <h3>Android</h3>
+</a>
+<p>You must set up in your app&#39;s Android Manifest (<code>android/src/main/AndroidManifest.xml</code>) the activities with the desired style: </p>
+<pre><code class="language-diff"><span class="hl-1">&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;</span><br/><span class="hl-1">  xmlns:tools=&quot;http://schemas.android.com/tools&quot;</span><br/><span class="hl-1">  package=&quot;com.example&quot;&gt;</span><br/><br/><span class="hl-1">  &lt;application</span><br/><span class="hl-1">    android:name=&quot;.MainApplication&quot;</span><br/><span class="hl-1">    android:icon=&quot;@mipmap/ic_launcher&quot;</span><br/><span class="hl-1">    android:label=&quot;@string/app_name&quot;&gt;</span><br/><br/><span class="hl-1">    &lt;activity</span><br/><span class="hl-1">      android:name=&quot;.MainActivity&quot;</span><br/><span class="hl-1">      android:configChanges=&quot;keyboard|keyboardHidden|orientation|screenSize|uiMode&quot;</span><br/><span class="hl-1">      android:exported=&quot;true&quot;</span><br/><span class="hl-1">      android:label=&quot;@string/app_name&quot;</span><br/><span class="hl-1">      android:launchMode=&quot;singleTask&quot;</span><br/><span class="hl-1">      android:windowSoftInputMode=&quot;adjustResize&quot;&gt;</span><br/><span class="hl-1">      &lt;intent-filter&gt;</span><br/><span class="hl-1">        &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;</span><br/><span class="hl-1">        &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;</span><br/><span class="hl-1">      &lt;/intent-filter&gt;</span><br/><span class="hl-1">    &lt;/activity&gt;</span><br/><br/><span class="hl-1">    &lt;!-- ... --&gt;</span><br/><br/><span class="hl-6">+    &lt;activity</span><br/><span class="hl-6">+      android:name=&quot;zendesk.support.guide.HelpCenterActivity&quot;</span><br/><span class="hl-6">+      android:theme=&quot;@style/ZendeskActivityTheme&quot; /&gt;</span><br/><span class="hl-6">+</span><br/><span class="hl-6">+    &lt;activity</span><br/><span class="hl-6">+      android:name=&quot;zendesk.support.guide.ViewArticleActivity&quot;</span><br/><span class="hl-6">+      android:theme=&quot;@style/ZendeskActivityTheme&quot; /&gt;</span><br/><span class="hl-6">+</span><br/><span class="hl-6">+    &lt;activity</span><br/><span class="hl-6">+      android:name=&quot;zendesk.support.request.RequestActivity&quot;</span><br/><span class="hl-6">+      android:theme=&quot;@style/ZendeskActivityTheme&quot; /&gt;</span><br/><span class="hl-6">+</span><br/><span class="hl-6">+    &lt;activity</span><br/><span class="hl-6">+      android:name=&quot;zendesk.support.requestlist.RequestListActivity&quot;</span><br/><span class="hl-6">+      android:theme=&quot;@style/ZendeskActivityTheme&quot; /&gt;</span><br/><span class="hl-6">+</span><br/><span class="hl-6">+    &lt;activity</span><br/><span class="hl-6">+      android:name=&quot;zendesk.messaging.MessagingActivity&quot;</span><br/><span class="hl-6">+      android:theme=&quot;@style/ZendeskActivityTheme&quot; /&gt;</span><br/><span class="hl-1">  &lt;/application&gt;</span><br/><span class="hl-1">&lt;/manifest&gt;</span>
+</code></pre>
+<p>And create the style in <code>android/src/main/res/values/styles.xml</code>:</p>
+<pre><code class="language-diff"><span class="hl-1">&lt;resources xmlns:tools=&quot;http://schemas.android.com/tools&quot;&gt;</span><br/><span class="hl-1">    &lt;!-- ... --&gt;</span><br/><br/><span class="hl-6">+    &lt;style name=&quot;ZendeskActivityTheme&quot; parent=&quot;ZendeskSdkTheme.Light&quot;&gt;</span><br/><span class="hl-6">+        &lt;item name=&quot;android:windowBackground&quot;&gt;@color/windowBackground&lt;/item&gt;</span><br/><span class="hl-6">+        &lt;item name=&quot;android:textColor&quot;&gt;@color/secondaryTextColor&lt;/item&gt;</span><br/><span class="hl-6">+        &lt;item name=&quot;android:textColorPrimary&quot;&gt;@color/secondaryTextColor&lt;/item&gt;</span><br/><span class="hl-6">+        &lt;item name=&quot;android:statusBarColor&quot;&gt;@color/primaryDarkColor&lt;/item&gt;</span><br/><span class="hl-6">+        &lt;item name=&quot;colorPrimary&quot;&gt;@color/primaryColor&lt;/item&gt;</span><br/><span class="hl-6">+        &lt;item name=&quot;colorPrimaryDark&quot;&gt;@color/primaryDarkColor&lt;/item&gt;</span><br/><span class="hl-6">+        &lt;item name=&quot;colorAccent&quot;&gt;@color/secondaryColor&lt;/item&gt;</span><br/><span class="hl-6">+        &lt;item name=&quot;android:windowLightStatusBar&quot; tools:targetApi=&quot;m&quot;&gt;false&lt;/item&gt;</span><br/><span class="hl-6">+    &lt;/style&gt;</span><br/><span class="hl-1">&lt;/resources&gt;</span>
+</code></pre>
+
+<a href="#ios" id="ios" style="color: inherit; text-decoration: none;">
+  <h3>iOS</h3>
+</a>
+<p>On iOS set the preferred color via the method <a href="modules.html#setPrimaryColor"><code>.setPrimaryColor(...)</code></a></p>
+</div></div><div class="col-4 col-menu menu-sticky-wrap menu-highlight"><nav class="tsd-navigation primary"><ul><li class="current"><a href="modules.html">Exports</a></li></ul></nav><nav class="tsd-navigation secondary menu-sticky"><ul><li class="tsd-kind-interface"><a href="interfaces/ChatOptions.html" class="tsd-kind-icon">Chat<wbr/>Options</a></li><li class="tsd-kind-interface"><a href="interfaces/IdentityJwt.html" class="tsd-kind-icon">Identity<wbr/>Jwt</a></li><li class="tsd-kind-interface"><a href="interfaces/IdentityUser.html" class="tsd-kind-icon">Identity<wbr/>User</a></li><li class="tsd-kind-interface"><a href="interfaces/InitOptions.html" class="tsd-kind-icon">Init<wbr/>Options</a></li><li class="tsd-kind-interface"><a href="interfaces/UserInfo.html" class="tsd-kind-icon">User<wbr/>Info</a></li><li class="tsd-kind-type-alias"><a href="modules.html#CallbackRequestNewToken" class="tsd-kind-icon">Callback<wbr/>Request<wbr/>New<wbr/>Token</a></li><li class="tsd-kind-type-alias"><a href="modules.html#Identity" class="tsd-kind-icon">Identity</a></li><li class="tsd-kind-function"><a href="modules.html#init" class="tsd-kind-icon">init</a></li><li class="tsd-kind-function"><a href="modules.html#setNotificationToken" class="tsd-kind-icon">set<wbr/>Notification<wbr/>Token</a></li><li class="tsd-kind-function"><a href="modules.html#setPrimaryColor" class="tsd-kind-icon">set<wbr/>Primary<wbr/>Color</a></li><li class="tsd-kind-function"><a href="modules.html#setUserIdentity" class="tsd-kind-icon">set<wbr/>User<wbr/>Identity</a></li><li class="tsd-kind-function"><a href="modules.html#setVisitorInfo" class="tsd-kind-icon">set<wbr/>Visitor<wbr/>Info</a></li><li class="tsd-kind-function"><a href="modules.html#showHelpCenter" class="tsd-kind-icon">show<wbr/>Help<wbr/>Center</a></li><li class="tsd-kind-function"><a href="modules.html#showTicketList" class="tsd-kind-icon">show<wbr/>Ticket<wbr/>List</a></li><li class="tsd-kind-function"><a href="modules.html#startChat" class="tsd-kind-icon">start<wbr/>Chat</a></li><li class="tsd-kind-function"><a href="modules.html#startChatOrTicket" class="tsd-kind-icon">start<wbr/>Chat<wbr/>Or<wbr/>Ticket</a></li><li class="tsd-kind-function"><a href="modules.html#startTicket" class="tsd-kind-icon">start<wbr/>Ticket</a></li><li class="tsd-kind-function"><a href="modules.html#updateUserToken" class="tsd-kind-icon">update<wbr/>User<wbr/>Token</a></li></ul></nav></div></div></div><footer class=""><div class="container"><h2>Legend</h2><div class="tsd-legend-group"><ul class="tsd-legend"><li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li></ul></div><h2>Settings</h2><p>Theme <select id="theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></p></div></footer><div class="overlay"></div><script src="assets/main.js"></script></body></html>
