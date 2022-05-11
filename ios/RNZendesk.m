@@ -92,13 +92,9 @@ RCT_EXPORT_METHOD(setUserIdentity: (NSDictionary *)options callback: (RCTRespons
     if (options[@"isEnabledJwtAuthenticator"]) {
         isEnabledJwtAuthenticator = options[@"isEnabledJwtAuthenticator"];
         if (isEnabledJwtAuthenticator) {
-            NSLog(@"%@: 111111", TAG_LOG);
             ZDKJWTAuth *authenticator = [ZDKJWTAuth new];
-            NSLog(@"%@: 22222222", TAG_LOG);
             [authenticator setCallbackReactNative:callback];
-            NSLog(@"%@: 33333333", TAG_LOG);
             [[ZDKChat instance] setIdentityWithAuthenticator:authenticator];
-            NSLog(@"%@: 4444444", TAG_LOG);
         }
     }
     
@@ -310,20 +306,16 @@ RCT_EXPORT_METHOD(setPrimaryColor:(NSString *)color) {
 @implementation ZDKJWTAuth
 
 - (void)setCallbackReactNative: (RCTResponseSenderBlock)callbackReactNative {
-    NSLog(@"%@: ----------------- setCallbackReactNative", TAG_LOG);
     onRequestNewTokenCallback = callbackReactNative;
 }
 
 - (void)getToken: (GetTokenCompletion)completion {
-    NSLog(@"%@: ----------------- getToken", TAG_LOG);
     if (isEnabledLoggable) {
         NSLog(@"%@: %@", TAG_LOG, @"Request new token is start");
     }
     
-    NSLog(@"%@: ----------------- latestJwtCompletion", TAG_LOG);
     latestJwtCompletion = completion;
     if (onRequestNewTokenCallback != nil) {
-        NSLog(@"%@: ----------------- onRequestNewTokenCallback", TAG_LOG);
         onRequestNewTokenCallback(@[]);
     }
 }
