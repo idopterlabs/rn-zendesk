@@ -26,7 +26,7 @@ RCT_EXPORT_METHOD(init:(NSDictionary *)options) {
         [ZDKCoreLogger setLogLevel:ZDKLogLevelDebug];
         isEnabledLoggable = true;
     }
-    
+
     [ZDKZendesk initializeWithAppId: options[@"appId"]
                            clientId: options[@"clientId"]
                          zendeskUrl: options[@"url"]];
@@ -40,21 +40,22 @@ RCT_EXPORT_METHOD(init:(NSDictionary *)options) {
 
 RCT_EXPORT_METHOD(setVisitorInfo:(NSDictionary *)options) {
     ZDKChatAPIConfiguration *config = [[ZDKChatAPIConfiguration alloc] init];
+
     if (options[@"department"]) {
-        config.department = options[@"department"];
+        config.departmentName = options[@"department"];
     }
-    
+
     if (options[@"tags"]) {
         config.tags = options[@"tags"];
     }
-    
+
     config.visitorInfo = [[ZDKVisitorInfo alloc] initWithName:options[@"name"]
                                                         email:options[@"email"]
                                                   phoneNumber:options[@"phone"]];
     ZDKChat.instance.configuration = config;
-    
+
     if (isEnabledLoggable) {
-        NSLog(@"%@: Setting visitor info: department: %@ tags: %@, email: %@, name: %@, phone: %@", TAG_LOG, config.department, config.tags, config.visitorInfo.email, config.visitorInfo.name, config.visitorInfo.phoneNumber);
+        NSLog(@"%@: Setting visitor info: department: %@ tags: %@, email: %@, name: %@, phone: %@", TAG_LOG, config.departmentName, config.tags, config.visitorInfo.email, config.visitorInfo.name, config.visitorInfo.phoneNumber);
     }
 }
 
@@ -63,7 +64,7 @@ RCT_EXPORT_METHOD(resetUserIdentity) {
         if (isEnabledLoggable) {
             NSLog(@"%@: Reset user identity is done", TAG_LOG);
         }
-        
+
         latestJwtCompletion = nil;
     }];
 }
@@ -80,7 +81,7 @@ RCT_EXPORT_METHOD(updateUserToken: (NSString *) token) {
         } else {
             latestJwtCompletion(token, nil);
         }
-        
+
         latestJwtCompletion = nil;
         if (isEnabledLoggable) {
             NSLog(@"%@: Request new token is done", TAG_LOG);
@@ -97,7 +98,7 @@ RCT_EXPORT_METHOD(setUserIdentity: (NSDictionary *)options callback: (RCTRespons
             [[ZDKChat instance] setIdentityWithAuthenticator:authenticator];
         }
     }
-    
+
     if (options[@"token"]) {
         id<ZDKObjCIdentity> userIdentity = [[ZDKObjCJwt alloc] initWithToken:options[@"token"]];
         [[ZDKZendesk instance] setIdentity:userIdentity];
@@ -147,6 +148,7 @@ RCT_EXPORT_METHOD(setNotificationToken:(NSData *)deviceToken) {
 
 RCT_EXPORT_METHOD(setPrimaryColor:(NSString *)color) {
     [ZDKCommonTheme currentTheme].primaryColor = [self colorFromHexString:color];
+    [[UINavigationBar appearance] setBarTintColor: [self colorFromHexString:color]];
 }
 
 - (UIColor *)colorFromHexString:(NSString *)hexString {
@@ -164,11 +166,11 @@ RCT_EXPORT_METHOD(setPrimaryColor:(NSString *)color) {
     if (options[@"botName"]) {
         botName = options[@"botName"];
     }
-    
+
     if (options[@"withChat"]) {
         engines = @[(id <ZDKEngine>) [ZDKChatEngine engineAndReturnError:&error]];
     }
-    
+
     ZDKHelpCenterUiConfiguration* helpCenterUiConfig = [ZDKHelpCenterUiConfiguration new];
     helpCenterUiConfig.objcEngines = engines;
     ZDKArticleUiConfiguration* articleUiConfig = [ZDKArticleUiConfiguration new];
@@ -177,14 +179,14 @@ RCT_EXPORT_METHOD(setPrimaryColor:(NSString *)color) {
         helpCenterUiConfig.showContactOptions = NO;
         articleUiConfig.showContactOptions = NO;
     }
-    
+
     UIViewController* controller = [ZDKHelpCenterUi buildHelpCenterOverviewUiWithConfigs: @[helpCenterUiConfig, articleUiConfig]];
-    
+
     UIViewController *topController = [UIApplication sharedApplication].keyWindow.rootViewController;
     while (topController.presentedViewController) {
         topController = topController.presentedViewController;
     }
-    
+
     UINavigationController *navControl = [[UINavigationController alloc] initWithRootViewController: controller];
     [topController presentViewController:navControl animated:YES completion:nil];
 }
@@ -204,7 +206,7 @@ RCT_EXPORT_METHOD(setPrimaryColor:(NSString *)color) {
             if (isEnabledLoggable) {
                 NSLog(@"%@: Error request getAccount: %@", TAG_LOG, error);
             }
-            
+
             [self startTicketFunction];
         }
     }];
@@ -216,34 +218,40 @@ RCT_EXPORT_METHOD(setPrimaryColor:(NSString *)color) {
     if (options[@"botName"]) {
         botName = options[@"botName"];
     }
-    
+
     messagingConfiguration.name = botName;
-    
+
     if (options[@"botImage"]) {
         messagingConfiguration.botAvatar = options[@"botImage"];
     }
-    
+
     NSError *error = nil;
     NSMutableArray *engines = [[NSMutableArray alloc] init];
-    
+
     [engines addObject:(id <ZDKEngine>) [ZDKChatEngine engineAndReturnError:&error]];
     [engines addObject:(id <ZDKEngine>) [ZDKSupportEngine engineAndReturnError:&error]];
-    
+
     if (!options[@"chatOnly"]) {
         [engines addObject:(id <ZDKEngine>) [ZDKAnswerBotEngine engineAndReturnError:&error]];
     }
-    
+
     ZDKChatConfiguration *chatConfiguration = [[ZDKChatConfiguration alloc] init];
+    ZDKChatFormConfiguration *formConfiguration = [[ZDKChatFormConfiguration alloc] initWithName:ZDKFormFieldStatusRequired
+                                                                                           email:ZDKFormFieldStatusOptional
+                                                                                     phoneNumber:ZDKFormFieldStatusOptional
+                                                                                      department:ZDKFormFieldStatusHidden];
     chatConfiguration.isPreChatFormEnabled = YES;
+    chatConfiguration.preChatFormConfiguration = formConfiguration;
     chatConfiguration.isAgentAvailabilityEnabled = YES;
-    
+
+
     UIViewController *chatController = [ZDKMessaging.instance buildUIWithEngines: engines
                                                                         configs: @[messagingConfiguration, chatConfiguration]
                                                                           error: &error];
     if (error && isEnabledLoggable) {
         NSLog(@"%@: Error occured %@", TAG_LOG, error);
     }
-    
+
     if (@available(iOS 13.0, *)) {
         chatController.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem: UIBarButtonSystemItemClose
                                                                                                         target: self
@@ -258,33 +266,33 @@ RCT_EXPORT_METHOD(setPrimaryColor:(NSString *)color) {
     while (topController.presentedViewController) {
         topController = topController.presentedViewController;
     }
-    
+
     UINavigationController *navControl = [[UINavigationController alloc] initWithRootViewController: chatController];
     [topController presentViewController:navControl animated:YES completion:nil];
 }
 
 - (void) startTicketFunction {
     UIViewController* controller = [ZDKRequestUi buildRequestUi];
-    
+
     UIViewController *topController = [UIApplication sharedApplication].keyWindow.rootViewController;
     while (topController.presentedViewController) {
         topController = topController.presentedViewController;
     }
-    
+
     UINavigationController *navControl = [[UINavigationController alloc] initWithRootViewController: controller];
-    
+
     [topController presentViewController:navControl animated:YES completion:nil];
 }
 
 - (void) showTicketListFunction {
     UIViewController* controller = [ZDKRequestUi buildRequestList];
-    
-    
+
+
     UIViewController *topController = [UIApplication sharedApplication].keyWindow.rootViewController;
     while (topController.presentedViewController) {
         topController = topController.presentedViewController;
     }
-    
+
     UINavigationController *navControl = [[UINavigationController alloc] initWithRootViewController: controller];
     [topController presentViewController:navControl animated:YES completion:nil];
 }
@@ -313,7 +321,7 @@ RCT_EXPORT_METHOD(setPrimaryColor:(NSString *)color) {
     if (isEnabledLoggable) {
         NSLog(@"%@: %@", TAG_LOG, @"Request new token is start");
     }
-    
+
     latestJwtCompletion = completion;
     if (onRequestNewTokenCallback != nil) {
         onRequestNewTokenCallback(@[]);
@@ -321,4 +329,3 @@ RCT_EXPORT_METHOD(setPrimaryColor:(NSString *)color) {
 }
 
 @end
-
