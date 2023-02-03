@@ -2,7 +2,7 @@
   "name": "@idopterlabs/rn-zendesk",
   "main": "index.js",
   "preferGlobal": false,
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "React Native Wrapper around Zendesk Chat",
   "license": "MIT",
   "keywords": [
