@@ -5,6 +5,7 @@
   "version": "0.5.1",
   "description": "React Native Wrapper around Zendesk Chat",
   "license": "MIT",
+  "author": "Idopter Labs",
   "keywords": [
     "android",
     "chat",
